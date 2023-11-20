@@ -7,6 +7,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException
 import sys
 import pandas as pd
+import json
+import matplotlib.pyplot as plt
 
 # Create ChromeOptions object
 chrome_options = Options()
@@ -14,17 +16,20 @@ chrome_options = Options()
 # Add the headless argument
 chrome_options.add_argument('--headless')
 
+with open("./input_data.json","r") as j_data:
+    site_data = json.load(j_data)
 
-def get_data(job_title, timeout=10, num_page=10):
+def get_data(job_title, timeout=10, num_page=10,query=""):
     """get data for nukari.com specific job"""
     print("Start getting data for you")
+    
     driver = Chrome()
 
     max_wait_time = timeout
 
     for i in range(1, num_page+1):
 
-        url = f"https://www.naukri.com/{job_title}-jobs-{i}?k={job_title}&experience=3&ctcFilter=6to10&ctcFilter=10to15&ctcFilter=15to25"
+        url = f"https://www.naukri.com/{job_title}-jobs-{i}?{query}"
         driver.get(url)
 
         try:
@@ -80,13 +85,32 @@ def get_data(job_title, timeout=10, num_page=10):
 
     return pd.DataFrame(name_map)
 
+def create_query(title,experience,ctc):
+    
+    query = f"k={job_title}"
+    if experience != "":
+        query = query + f"&experience={experience}"
+    if ctc != "":
+        query = query + f"&ctcFilter={site_data.get('ctc').get(ctc,'0to3')}"
+    return query
 
 def write_dataframe(df: pd.DataFrame, filename="data"):
     
     if filename == "":
         filename = "data"
 
-    df.to_excel(f"./{filename}.xlsx")
+    df.to_excel(f"./{filename}.xlsx",index=False)
+
+def create_pie_chart(df,file_name):
+
+    categories_df = df['Skill Tags'].str.split(',', expand=True).stack()
+    category_counts = categories_df.value_counts()
+    category_counts = category_counts[category_counts > 10]
+    labels = category_counts.index
+    sizes = category_counts.values
+    plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
+    plt.axis('equal') 
+    plt.savefig(f"{file_name}_pie.png")
 
 
 if __name__ == "__main__":
@@ -107,6 +131,12 @@ if __name__ == "__main__":
         write_dataframe(df)
     except IndexError:
         job_title = input("Enter Job title: ")
+        exp = input("Enter Your Exprience: ")
+        ctc = input("Enter your CTC: ")
+        img = input("want pie chart for skills? [Y/N]: ")
         file_name = input("Enter file name you want to save: ")
-        df = get_data(job_title)
+        query = create_query(job_title,exp,ctc)
+        df = get_data(job_title,query=query)
+        if img.upper() == "Y":
+            create_pie_chart(df,file_name)
         write_dataframe(df, file_name)
