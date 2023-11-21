@@ -5,6 +5,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
 import sys
 import pandas as pd
 import json
@@ -23,7 +25,7 @@ def get_data(job_title, timeout=10, num_page=10,query=""):
     """get data for nukari.com specific job"""
     print("Start getting data for you")
     
-    driver = Chrome()
+    driver = Chrome(service=ChromeService(ChromeDriverManager().install()))
 
     max_wait_time = timeout
 
@@ -85,7 +87,7 @@ def get_data(job_title, timeout=10, num_page=10,query=""):
 
     return pd.DataFrame(name_map)
 
-def create_query(title,experience,ctc):
+def create_query(job_title,experience,ctc):
     
     query = f"k={job_title}"
     if experience != "":
