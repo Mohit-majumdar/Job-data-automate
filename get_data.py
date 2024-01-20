@@ -11,12 +11,12 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 import matplotlib.pyplot as plt
 from pathlib import Path
-from utils  import *
+from .utils import *
 from urllib.parse import quote
 
 # Global veribles
 max_wait_time = 10
-num_page = 10
+num_page = 2
 OUTPUT_DIR = Path("./output")
 EXCEL_DIR = OUTPUT_DIR / "excel_files"
 PIE_DIR = OUTPUT_DIR / "piechart"
@@ -31,8 +31,18 @@ with open("./input_data.json", "r") as j_data:
     site_data = json.load(j_data)
 
 
-def get_naukri_data(job_title, query=""):
+def get_naukri_data(job_title, query="") -> pd.DataFrame:
     """getting data from naukri.com"""
+    name_map = {
+        "Job Name": [],
+        "Experience": [],
+        "Salary": [],
+        "Skill Tags": [],
+        "Location": [],
+        "Company": [],
+        "Job link": []
+
+    }
 
     # initializing  chrome driver
     driver = Chrome(service=ChromeService(ChromeDriverManager().install()))
@@ -94,16 +104,52 @@ def get_naukri_data(job_title, query=""):
 
     return pd.DataFrame(name_map)
 
+# TODO: complete this
 
-def get_linkedin_data():
+
+def get_linkedin_data() -> pd.DataFrame:
+    name_map = {
+        "Job Name": [],
+        "Experience": [],
+        "Salary": [],
+        "Skill Tags": [],
+        "Location": [],
+        "Company": [],
+        "Job link": []
+
+    }
+
+    pass
+
+# TODO: complete this
+
+
+def get_indded_data() -> pd.DataFrame:
+    name_map = {
+        "Job Name": [],
+        "Experience": [],
+        "Salary": [],
+        "Skill Tags": [],
+        "Location": [],
+        "Company": [],
+        "Job link": []
+
+    }
+
     pass
 
 
-def get_indded_data():
-    pass
+def get_monster_data(query="") -> pd.DataFrame:
+    name_map = {
+        "Job Name": [],
+        "Experience": [],
+        "Salary": [],
+        "Skill Tags": [],
+        "Location": [],
+        "Company": [],
+        "Job link": []
 
-
-def get_monster_data(query=""):
+    }
 
     driver = Chrome(service=ChromeService(ChromeDriverManager().install()))
     for limit in range(0, 200, 100):
@@ -163,7 +209,8 @@ def get_monster_data(query=""):
 
             try:
                 el_id = el.next_element.attrs.get("id")
-                job_link = get_monster_job_link(job_title, company, location, el_id)
+                job_link = get_monster_job_link(
+                    job_title, company, location, el_id)
                 name_map["Job link"].append(job_link)
             except:
                 name_map["Job link"].append(None)
@@ -222,22 +269,12 @@ def create_pie_chart(df, file_name):
 
 if __name__ == "__main__":
 
-    name_map = {
-        "Job Name": [],
-        "Experience": [],
-        "Salary": [],
-        "Skill Tags": [],
-        "Location": [],
-        "Company": [],
-        "Job link": []
-
-    }
     try:
         job_title = sys.argv[1]
         df = get_data(job_title)
         write_dataframe(df)
     except IndexError:
-        job_title = input("Enter Job title: ").replace(" ","+")
+        job_title = input("Enter Job title: ").replace(" ", "+")
         exp = input("Enter Your Experience: ")
         ctc = input("Enter your CTC: ")
         img = input("want pie chart for skills? [Y/N]: ")
