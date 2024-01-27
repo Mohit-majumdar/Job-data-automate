@@ -2,3 +2,5 @@
 *.xlsx
 *.ipynb
 venv/**
+.env
+.env_local

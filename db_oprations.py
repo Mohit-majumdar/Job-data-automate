@@ -1,12 +1,16 @@
 from pymongo import MongoClient
 from datetime import datetime
+from decouple import config
 
 
 class Db_oprations:
     """all db oprations are perfom eg: Insert, Read, Update"""
 
     def __init__(self) -> None:
-        self.connection_string = "mongodb://mongo:12345@65.2.168.195"
+        user_name = config("DB_USERNAME")
+        password = config("DB_PASSWORD")
+        address = config("IP_ADDRESS")
+        self.connection_string = f"mongodb://{user_name}:{password}@{address}"
         self.client = MongoClient(self.connection_string)
         self.db = self.client.jobData
         self.collection = self.db.job_data
