@@ -11,8 +11,9 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 import matplotlib.pyplot as plt
 from pathlib import Path
-from .utils import *
+from utils import *
 from urllib.parse import quote
+from db_oprations import Db_oprations
 
 # Global veribles
 max_wait_time = 10
@@ -40,20 +41,19 @@ def get_naukri_data(job_title, query="") -> pd.DataFrame:
         "Skill Tags": [],
         "Location": [],
         "Company": [],
-        "Job link": []
-
+        "Job link": [],
     }
 
     # initializing  chrome driver
     driver = Chrome(service=ChromeService(ChromeDriverManager().install()))
-    for i in range(1, num_page+1):
-
+    for i in range(1, num_page + 1):
         url = f"https://www.naukri.com/{job_title}-jobs-{i}?{query}"
         driver.get(url)
 
         try:
             element_present = EC.presence_of_element_located(
-                (By.CLASS_NAME, 'srp-jobtuple-wrapper'))
+                (By.CLASS_NAME, "srp-jobtuple-wrapper")
+            )
             WebDriverWait(driver, max_wait_time).until(element_present)
         except TimeoutException:
             print("Timed out waiting for page to load")
@@ -78,8 +78,9 @@ def get_naukri_data(job_title, query="") -> pd.DataFrame:
             except:
                 name_map["Location"].append(None)
             try:
-                job_tags = ",".join([i.getText()
-                                    for i in el.css.select("ul.tags-gt >li")])
+                job_tags = ",".join(
+                    [i.getText() for i in el.css.select("ul.tags-gt >li")]
+                )
                 name_map["Skill Tags"].append(job_tags)
             except:
                 name_map["Skill Tags"].append(None)
@@ -104,6 +105,7 @@ def get_naukri_data(job_title, query="") -> pd.DataFrame:
 
     return pd.DataFrame(name_map)
 
+
 # TODO: complete this
 
 
@@ -115,11 +117,11 @@ def get_linkedin_data() -> pd.DataFrame:
         "Skill Tags": [],
         "Location": [],
         "Company": [],
-        "Job link": []
-
+        "Job link": [],
     }
 
     pass
+
 
 # TODO: complete this
 
@@ -132,8 +134,7 @@ def get_indded_data() -> pd.DataFrame:
         "Skill Tags": [],
         "Location": [],
         "Company": [],
-        "Job link": []
-
+        "Job link": [],
     }
 
     pass
@@ -147,8 +148,7 @@ def get_monster_data(query="") -> pd.DataFrame:
         "Skill Tags": [],
         "Location": [],
         "Company": [],
-        "Job link": []
-
+        "Job link": [],
     }
 
     driver = Chrome(service=ChromeService(ChromeDriverManager().install()))
@@ -157,34 +157,33 @@ def get_monster_data(query="") -> pd.DataFrame:
         driver.get(url)
         try:
             element_present = EC.presence_of_element_located(
-                (By.CLASS_NAME, 'srpResultCardContainer'))
+                (By.CLASS_NAME, "srpResultCardContainer")
+            )
             WebDriverWait(driver, max_wait_time).until(element_present)
         except TimeoutException:
             print("Timed out waiting for page to load")
             continue
 
-        source = driver.find_element(
-            By.TAG_NAME, "body").get_attribute("outerHTML")
+        source = driver.find_element(By.TAG_NAME, "body").get_attribute("outerHTML")
         soup = bs4.BeautifulSoup(source, "html.parser")
         els = soup.find_all("div", {"class": "srpResultCardContainer"})
         for el in els:
             try:
-                job_title = el.find(
-                    "div", {"class": "jobTitle"}).get_text(strip=True)
+                job_title = el.find("div", {"class": "jobTitle"}).get_text(strip=True)
                 name_map["Job Name"].append(job_title)
             except:
                 name_map["Job Name"].append(None)
 
             try:
-                company = el.find(
-                    "div", {"class": "companyName"}).get_text(strip=True)
+                company = el.find("div", {"class": "companyName"}).get_text(strip=True)
                 name_map["Company"].append(company)
             except:
                 name_map["Company"].append(None)
 
             try:
                 skill = el.find("div", {"class": "skillDetails"}).get_text(
-                    strip=True, separator=",")
+                    strip=True, separator=","
+                )
                 name_map["Skill Tags"].append(skill)
             except:
                 name_map["Skill Tags"].append(None)
@@ -209,8 +208,7 @@ def get_monster_data(query="") -> pd.DataFrame:
 
             try:
                 el_id = el.next_element.attrs.get("id")
-                job_link = get_monster_job_link(
-                    job_title, company, location, el_id)
+                job_link = get_monster_job_link(job_title, company, location, el_id)
                 name_map["Job link"].append(job_link)
             except:
                 name_map["Job link"].append(None)
@@ -248,7 +246,6 @@ def create_query(job_title, experience, ctc, app=""):
 
 
 def write_dataframe(df: pd.DataFrame, filename="data"):
-
     if filename == "":
         filename = "data"
 
@@ -256,19 +253,17 @@ def write_dataframe(df: pd.DataFrame, filename="data"):
 
 
 def create_pie_chart(df, file_name):
-
-    categories_df = df['Skill Tags'].str.split(',', expand=True).stack()
+    categories_df = df["Skill Tags"].str.split(",", expand=True).stack()
     category_counts = categories_df.value_counts()
     category_counts = category_counts[category_counts > 10]
     labels = category_counts.index
     sizes = category_counts.values
-    plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
-    plt.axis('equal')
+    plt.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
+    plt.axis("equal")
     plt.savefig(f"{PIE_DIR}/{file_name}_pie.png")
 
 
 if __name__ == "__main__":
-
     try:
         job_title = sys.argv[1]
         df = get_data(job_title)
@@ -282,6 +277,8 @@ if __name__ == "__main__":
         file_name = input("Enter file name you want to save: ")
         query = create_query(job_title, exp, ctc, app)
         df = get_data(job_title, app=app, query=query)
+        db_obj = Db_oprations()
+        db_obj.write_to_db(job_title, df, exp, ctc, app)
         if img.upper() == "Y":
             create_pie_chart(df, file_name)
         write_dataframe(df, file_name)
