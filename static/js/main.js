@@ -8,6 +8,14 @@ async function get_data() {
     },
     body: JSON.stringify(data),
   });
+  if (res.status == 300) {
+    res = await res.json();
+    const loader = document.getElementById("loader");
+    loader.style.display = "none";
+    alert(res.message);
+
+    return;
+  }
   res = await res.json();
   console.log(res);
   fill_data(res);
@@ -37,7 +45,7 @@ function fill_data(data) {
     let company = new_row.insertCell(4);
     let location = new_row.insertCell(5);
     let link = new_row.insertCell(6);
-    let applied = new_row.insertCell(7)
+    let applied = new_row.insertCell(7);
 
     //initialize value
     job_title.innerHTML = d["Job Name"];
@@ -47,7 +55,7 @@ function fill_data(data) {
     company.innerHTML = d["Company"];
     location.innerHTML = d["Location"];
     link.innerHTML = `<a href=${d["Job link"]} target= "_blank">Job Link</a>`;
-    applied.innerHTML = `<input type="checkbox" />`
+    applied.innerHTML = `<input type="checkbox" />`;
   });
 }
 
