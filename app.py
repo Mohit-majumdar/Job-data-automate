@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 import json
-from db_oprations import Db_oprations
+from .db_oprations import Db_oprations
 
 
 app = Flask(__name__)
@@ -19,8 +19,6 @@ def generate_data():
     salary = query_prams.get("salary", "0")
     experience = query_prams.get("experience", "0")
     job_title = query_prams.get("job-title", "")
-    if experience == "":
-        experience = "0"
 
     db = Db_oprations()
     data = db.read_from_db(job_title, experience, salary, app_name)
@@ -28,4 +26,4 @@ def generate_data():
     if not data:
         db.add_to_search_queue(job_title, experience, salary, app_name)
         return jsonify(message="We will get data shorty for you"), 300
-    return data.get("data")
+    return {"data": data.get("data"), "pie_data": data.get("pie_data")}
