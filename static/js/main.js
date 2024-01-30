@@ -1,3 +1,5 @@
+var myPieChart = "";
+var table = "";
 async function get_data() {
   hide_table_show_loader();
   const data = get_query_data();
@@ -18,13 +20,22 @@ async function get_data() {
   }
   res = await res.json();
   console.log(res);
-  fill_data(res);
+  let pie_data = res.pie_data;
+  if (table != "") {
+    table.destroy();
+  }
+  fill_data(res.data);
   initialize_table();
   hide_loader_show_table();
+  if (myPieChart != "") {
+    myPieChart.destroy();
+  }
+  create_pie_chart(pie_data);
 }
 
 function initialize_table() {
-  $("#table").DataTable({
+  $("#table").DataTable().destroy();
+  table = $("#table").DataTable({
     destroy: true,
     dom: "Bfrtip",
     buttons: ["copyHtml5", "excelHtml5", "csvHtml5", "pdfHtml5"],
@@ -33,6 +44,7 @@ function initialize_table() {
 
 function fill_data(data) {
   const tbody = document.getElementById("table-body");
+  tbody.innerHTML = "";
   data.map((d) => {
     //create new row in table
     let new_row = tbody.insertRow();
@@ -75,11 +87,15 @@ function get_query_data() {
 }
 
 function hide_table_show_loader() {
-  const loader = document.getElementById("loader");
-  const table = document.getElementById("table");
+  try {
+    const loader = document.getElementById("loader");
+    const table = document.getElementById("table");
 
-  table.style.display = "none";
-  loader.style.display = "block";
+    table.style.display = "none";
+    loader.style.display = "block";
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 function hide_loader_show_table() {
@@ -88,4 +104,33 @@ function hide_loader_show_table() {
 
   table.style.display = "";
   loader.style.display = "none";
+}
+
+function create_pie_chart(pie_data) {
+  var data = {
+    labels: pie_data.lables,
+    datasets: [
+      {
+        data: pie_data.size,
+        backgroundColor: [
+          "rgb(255, 99, 132)",
+          "rgb(54, 162, 235)",
+          "rgb(255, 205, 86)",
+          "rgb(0, 255, 0)",
+          "rgb(0, 0, 255)",
+          "rgb(255, 255, 0)",
+          "rgb(255, 0, 255)",
+          "rgb(0, 255, 255)",
+          "rgb(255, 165, 0)",
+          "rgb(128, 0, 128)",
+        ],
+        hoverOffset: 4,
+      },
+    ],
+  };
+  const ctx = document.getElementById("skill-chart");
+  myPieChart = new Chart(ctx, {
+    type: "pie",
+    data: data,
+  });
 }

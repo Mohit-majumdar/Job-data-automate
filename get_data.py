@@ -255,12 +255,14 @@ def write_dataframe(df: pd.DataFrame, filename="data"):
 def create_pie_chart(df, file_name):
     categories_df = df["Skill Tags"].str.split(",", expand=True).stack()
     category_counts = categories_df.value_counts()
-    category_counts = category_counts[category_counts > 10]
+    # category_counts = category_counts[category_counts > 10]
     labels = category_counts.index
     sizes = category_counts.values
-    plt.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
-    plt.axis("equal")
-    plt.savefig(f"{PIE_DIR}/{file_name}_pie.png")
+    # comment return statement and uncomment below on for get piechart in local
+    return {"lables": labels.tolist()[:10], "size": sizes.tolist()[:10]}
+    # plt.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
+    # plt.axis("equal")
+    # plt.savefig(f"{PIE_DIR}/{file_name}_pie.png")
 
 
 if __name__ == "__main__":
