@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 import json
-from .db_oprations import Db_oprations
+from db_oprations import Db_oprations
 
 
 app = Flask(__name__)
