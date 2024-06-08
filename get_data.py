@@ -234,7 +234,7 @@ def create_query(job_title, experience, ctc, app=""):
     if not d:
         print("Entered wrong app name")
         sys.exit(1)
-    q, exp, salary, ctc_map = d.values()
+    q, exp, salary, ctc_map, age = d.values()
 
     query = f"{q}={job_title}"
     if experience != "":
@@ -242,6 +242,7 @@ def create_query(job_title, experience, ctc, app=""):
     if ctc != "":
         query = query + f"&{salary}={ctc_map.get(ctc,'0to3')}"
 
+    query = query + f"&{age}=3"
     return query
 
 

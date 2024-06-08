@@ -14,7 +14,9 @@ def get_data_for_job_queue():
         job_title, exp, ctc, app = job_key.split("_")
         query = create_query(job_title, exp, ctc, app)
         data = get_data(job_title, query, app)
-        pie_data = create_pie_chart(data, "")
+        pie_data = ""
+        if not data.empty:
+            pie_data = create_pie_chart(data, "")
         DB.write_to_db(job_title, data, key=job_key, pie_data=pie_data)
 
 
@@ -27,7 +29,9 @@ def update_jobs():
         job_title, exp, ctc, app = job_key.split("_")
         query = create_query(job_title, exp, ctc, app)
         data = get_data(job_title, query, app)
-        pie_data = create_pie_chart(data, "")
+        pie_data = ""
+        if not data.empty:
+            pie_data = create_pie_chart(data, "")
         print(pie_data)
         DB.update_job(job_key, data, pie_data)
 
