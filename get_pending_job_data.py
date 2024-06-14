@@ -1,4 +1,4 @@
-from get_data import get_data, create_query, create_pie_chart
+from get_data import DRIVER, get_data, create_query, create_pie_chart
 from db_oprations import Db_oprations
 from datetime import datetime, timedelta
 
@@ -21,7 +21,7 @@ def get_data_for_job_queue():
 
 
 def update_jobs():
-    filer_time = datetime.now() - timedelta(days=5)
+    filer_time = datetime.now() - timedelta(days=3)
     jobs = DB.older_job(filer_time)
     for job in jobs:
         print(job.get("key"), job.get("updated_at"))
@@ -38,3 +38,4 @@ def update_jobs():
 
 get_data_for_job_queue()
 update_jobs()
+DRIVER.quit()
