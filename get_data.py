@@ -2,7 +2,7 @@ import sys
 import pandas as pd
 import json
 import bs4
-from selenium.webdriver import Chrome
+from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -26,7 +26,8 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 EXCEL_DIR.mkdir(exist_ok=True)
 PIE_DIR.mkdir(exist_ok=True)
 
-
+OPTIONS = webdriver.ChromeOptions()
+DRIVER = webdriver.Remote(options=OPTIONS)
 # reading config json file for all needed data
 with open("./input_data.json", "r") as j_data:
     site_data = json.load(j_data)
@@ -45,21 +46,21 @@ def get_naukri_data(job_title, query="") -> pd.DataFrame:
     }
 
     # initializing  chrome driver
-    driver = Chrome(service=ChromeService(ChromeDriverManager().install()))
+
     for i in range(1, num_page + 1):
         url = f"https://www.naukri.com/{job_title}-jobs-{i}?{query}"
-        driver.get(url)
+        DRIVER.get(url)
 
         try:
             element_present = EC.presence_of_element_located(
                 (By.CLASS_NAME, "srp-jobtuple-wrapper")
             )
-            WebDriverWait(driver, max_wait_time).until(element_present)
+            WebDriverWait(DRIVER, max_wait_time).until(element_present)
         except TimeoutException:
             print("Timed out waiting for page to load")
             continue
 
-        source = driver.find_element(By.ID, "root").get_attribute("outerHTML")
+        source = DRIVER.find_element(By.ID, "root").get_attribute("outerHTML")
         soup = bs4.BeautifulSoup(source, "html.parser")
         for el in soup.css.select(".srp-jobtuple-wrapper"):
             try:
@@ -151,20 +152,19 @@ def get_monster_data(query="") -> pd.DataFrame:
         "Job link": [],
     }
 
-    driver = Chrome(service=ChromeService(ChromeDriverManager().install()))
     for limit in range(0, 200, 100):
         url = f"https://www.foundit.in/srp/results?{query}&start={limit}&limit=100"
-        driver.get(url)
+        DRIVER.get(url)
         try:
             element_present = EC.presence_of_element_located(
                 (By.CLASS_NAME, "srpResultCardContainer")
             )
-            WebDriverWait(driver, max_wait_time).until(element_present)
+            WebDriverWait(DRIVER, max_wait_time).until(element_present)
         except TimeoutException:
             print("Timed out waiting for page to load")
             continue
 
-        source = driver.find_element(By.TAG_NAME, "body").get_attribute("outerHTML")
+        source = DRIVER.find_element(By.TAG_NAME, "body").get_attribute("outerHTML")
         soup = bs4.BeautifulSoup(source, "html.parser")
         els = soup.find_all("div", {"class": "srpResultCardContainer"})
         for el in els:

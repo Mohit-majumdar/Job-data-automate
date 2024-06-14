@@ -1,6 +1,5 @@
 {
   "naukri": {
-    "age": "age",
     "query": "q",
     "experience": "experience",
     "salary": "ctcFilter",
@@ -21,7 +20,8 @@
       "13": "10to15",
       "14": "10to15",
       "15": "10to15"
-    }
+    },
+    "age": "jobAge"
   },
   "foundit": {
     "query": "query",
