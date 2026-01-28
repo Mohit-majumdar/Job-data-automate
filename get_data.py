@@ -17,7 +17,7 @@ from db_oprations import Db_oprations
 
 # Global veribles
 max_wait_time = 10
-num_page = 2
+num_page = 10
 OUTPUT_DIR = Path("./output")
 EXCEL_DIR = OUTPUT_DIR / "excel_files"
 PIE_DIR = OUTPUT_DIR / "piechart"
@@ -229,14 +229,14 @@ def get_data(job_title, query="", app=""):
     return pd.DataFrame()
 
 
-def create_query(job_title, experience, ctc, app=""):
+def create_query(job_title, experience, ctc, app="", location="indore"):
     d = site_data.get(app.lower())
     if not d:
         print("Entered wrong app name")
         sys.exit(1)
-    q, exp, salary, ctc_map, age = d.values()
+    q, exp, salary, ctc_map, age, loc = d.values()
 
-    query = f"{q}={job_title}"
+    query = f"{q}={job_title}&{loc}={location}"
     if experience != "":
         query = query + f"&{exp}={experience}"
     if ctc != "":
@@ -285,3 +285,5 @@ if __name__ == "__main__":
         if img.upper() == "Y":
             create_pie_chart(df, file_name)
         write_dataframe(df, file_name)
+    finally:
+        DRIVER.quit()

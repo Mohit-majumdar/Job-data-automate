@@ -21,13 +21,15 @@
       "14": "10to15",
       "15": "10to15"
     },
-    "age": "jobAge"
+    "age": "jobAge",
+    "location":"l"
   },
   "foundit": {
     "query": "query",
     "experience": "experienceRanges",
     "salary": "salaryRanges",
     "ctc": {},
-    "age": "jobFreshness"
+    "age": "jobFreshness",
+    "location":""
   }
 }
